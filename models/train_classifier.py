@@ -14,6 +14,7 @@ from sklearn.multioutput import MultiOutputClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 from sklearn.model_selection import GridSearchCV
+import pickle
 nltk.download('stopwords')
 nltk.download('wordnet')
 nltk.download('punkt')
@@ -50,17 +51,37 @@ def build_model():
     model pipeline. includes count vectorizer, tfidf and classification estimator
     :return: pipeline
     """
-    pipeline = Pipeline([('count', CountVectorizer(tokenizer=tokenize)), ('tfidf', TfidfTransformer()),
-                         ('clf', MultiOutputClassifier(RandomForestClassifier()))])
+    pipeline = Pipeline([('count', CountVectorizer(tokenizer=tokenize, ngram_range=(1, 2))),
+                         ('tfidf', TfidfTransformer()),
+                         ('clf', MultiOutputClassifier(RandomForestClassifier(n_estimators=100)))])
     return pipeline
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+    """
+    run clasisfication report for each category
+    :param model:
+    :param X_test:
+    :param Y_test:
+    :param category_names:
+    :return:
+    """
+    Y_pred = model.predict(X_test)
+    for i in range(len(Y_pred[0])):
+        print(category_names[i])
+        print(classification_report(np.transpose(Y_test)[i], np.transpose(Y_pred)[i]))
 
 
 def save_model(model, model_filepath):
-    pass
+    """
+    save trained model to file
+    :param model:
+    :param model_filepath:
+    :return:
+    """
+    p = open(model_filepath, "wb")
+    pickle.dump(model, p)
+    p.close()
 
 
 def main():
