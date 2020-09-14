@@ -41,6 +41,9 @@ def clean_data(df):
     df = pd.concat([df, categories], axis=1)
 
     df = df.drop_duplicates()
+    #related column has value 2 for some records, replacing it with 1. child_alone columns only has 0 values, dropping
+    df['related'] = df['related'].replace([2], 1)
+    df = df.drop(['child_alone'], axis=1)
     return df
 
 

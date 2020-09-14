@@ -30,7 +30,7 @@ def load_data(database_filepath):
     df = pd.read_sql_table('DisasterResponse', engine)
     X = df['message']
     Y = df.drop(['id', 'message', 'original', 'genre'], axis=1).values
-    category_names = list(Y.columns)
+    category_names = list(df.drop(['id', 'message', 'original', 'genre'], axis=1).columns)
     return X, Y, category_names
 
 
@@ -53,7 +53,7 @@ def build_model():
     """
     pipeline = Pipeline([('count', CountVectorizer(tokenizer=tokenize, ngram_range=(1, 2))),
                          ('tfidf', TfidfTransformer()),
-                         ('clf', MultiOutputClassifier(RandomForestClassifier(n_estimators=100)))])
+                         ('clf', MultiOutputClassifier(RandomForestClassifier(n_estimators=50)))])
     return pipeline
 
 
