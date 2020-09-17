@@ -26,11 +26,11 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///../data/YourDatabaseName.db')
-df = pd.read_sql_table('YourTableName', engine)
+engine = create_engine('sqlite:///../data/DisasterResponse.db')
+df = pd.read_sql_table('DisasterResponse', engine)
 
 # load model
-model = joblib.load("../models/your_model_name.pkl")
+model = joblib.load("../models/classifier.pkl")
 
 
 # index webpage displays cool visuals and receives user input text for model
@@ -42,6 +42,14 @@ def index():
     # TODO: Below is an example - modify to extract data for your own visuals
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
+
+    # categories frequency visualisation
+    # extracting category names and frequency of appearance
+    category_names = list(df.drop(['id', 'message', 'original', 'genre'], axis=1).columns)
+    categories_sum = [sum(df[cat]) for cat in category_names]
+
+    # extracting messages length for visualisation
+    text_length = list(df['message'].apply(lambda x: len(x)))
     
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
@@ -61,6 +69,33 @@ def index():
                 },
                 'xaxis': {
                     'title': "Genre"
+                }
+            }
+        },
+        {
+            'data': [
+                Pie(
+                    values=categories_sum,
+                    labels=category_names,
+                    textinfo="none"
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Message Categories'
+            }
+        },
+        {
+            'data': [
+                Box(
+                    x=text_length
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Messages Length',
+                'xaxis': {
+                    'title': "Length"
                 }
             }
         }
