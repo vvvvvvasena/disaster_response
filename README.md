@@ -9,7 +9,7 @@ Source data includes message raw text and pre-assigned categories for each of th
 All raw data is first processed, normalized and cleaned. Count vectorizer and TFIDF are used to prepare features for the model to train on.
 
 Classifier being used is Random Forest, which showed itself as the best in this particular scenario.
-Average f1 score is 0.885.
+Average f1 score is 0.92.
 
 Working model is presented via a web app where user can input message text which will further be classified.
 

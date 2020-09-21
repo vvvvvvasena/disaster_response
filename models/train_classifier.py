@@ -13,7 +13,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
-from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.model_selection import GridSearchCV
 import pickle
 nltk.download('stopwords')
 nltk.download('wordnet')
@@ -49,12 +49,21 @@ def tokenize(text):
 def build_model():
     """
     model pipeline. includes count vectorizer, tfidf and classification estimator
-    :return: pipeline
+    using gridsearchcv to find optimal parameters
+    :return: cv object
     """
-    pipeline = Pipeline([('count', CountVectorizer(tokenizer=tokenize, ngram_range=(1, 2))),
+    pipeline = Pipeline([('count', CountVectorizer(tokenizer=tokenize)),
                          ('tfidf', TfidfTransformer()),
-                         ('clf', MultiOutputClassifier(RandomForestClassifier(n_estimators=50)))])
-    return pipeline
+                         ('clf', MultiOutputClassifier(RandomForestClassifier()))])
+    parameters = {
+        'count__ngram_range': ((1, 1), (1, 2)),
+        'count__max_df': (0.75, 1.0),
+        'clf__estimator__n_estimators': [50, 100],
+        'clf__estimator__max_features': [None, 'sqrt'],
+        'clf__estimator__max_samples': [0.8, None]
+    }
+    cv = GridSearchCV(pipeline, param_grid=parameters, cv=3, verbose=2)
+    return cv
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
@@ -90,13 +99,18 @@ def main():
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
         X, Y, category_names = load_data(database_filepath)
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
-        
+
         print('Building model...')
-        model = build_model()
-        
+        cv = build_model()
+
         print('Training model...')
-        model.fit(X_train, Y_train)
-        
+        # using grid search ehre
+        cv.fit(X_train, Y_train)
+        # best found estimator
+        model = cv.best_estimator_
+        print('Best params:')
+        print(cv.best_params_)
+
         print('Evaluating model...')
         evaluate_model(model, X_test, Y_test, category_names)
 
